@@ -88,6 +88,7 @@ void UARTSetup();
 volatile int byte = 0;
 volatile int buffer = 0;
 
+// Initializes Red, Green, and Blue (RGB) LED
 void LEDSetup(void)
 {
     // Red LED
@@ -103,7 +104,8 @@ void LEDSetup(void)
     P1SEL |= BIT4;                  // Allows BIT4 to be the output of TA0.3
 }
 
-void timerSetup(void)
+// Initializes Timer A0
+void TimerSetup(void)
 {
     TA0CTL = TASSEL_2 + MC_1;           // SMCLK set to UP mode
     TA0CCR0 = 255;                      // PWM Period
@@ -121,6 +123,7 @@ void timerSetup(void)
     TA0CCTL3 = OUTMOD_2;                // Toggle/Reset
 }
 
+// Initializes UART
 void UARTSetup(void)
 {
     P4SEL |= (BIT4+BIT5);                   // Allows BIT4 to become the TXD output and BIT5 to become the RXD input
@@ -139,7 +142,7 @@ int main(void)
 {
     WDTCTL = WDTPW | WDTHOLD;           // Stop Watchdog Timer
     LEDSetup();
-    timerSetup();
+    TimerSetup();
     UARTSetup();
 
     __bis_SR_register(LPM0_bits + GIE);   // Low Power Mode with Global Interrupt Enabled
@@ -147,7 +150,6 @@ int main(void)
 }
 
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
-
 #pragma vector=USCI_A1_VECTOR
 __interrupt void USCI_A1_ISR(void)
 #elif defined(__GNUC__)
@@ -196,13 +198,12 @@ void __attribute__ ((interrupt(USCI_A1_VECTOR))) USCI_A1_ISR (void)
 
               if(byte != buffer - 1)
               {
-                  byte += 1;
+                  byte += 1;     // Increments to next byte
               }
 
               else if (byte == buffer - 1)
               {
-                            // Reset Count
-                   byte = 0;
+                   byte = 0;                    // Reset Count
               }
 
         break;
@@ -213,4 +214,3 @@ void __attribute__ ((interrupt(USCI_A1_VECTOR))) USCI_A1_ISR (void)
 
       }
 }
-
