@@ -128,7 +128,7 @@ void UARTSetup(void)
 {
     P4SEL |= (BIT4+BIT5);                   // Allows BIT4 to become the TXD output and BIT5 to become the RXD input
     UCA1CTL1 |= UCSWRST;                    // State Machine Reset + Small Clock Initialization
-    UCA1CTL1 |= UCSSEL_2;                   // Sets USCI Clock Source to SMCLK
+   UCA1CTL1 |= UCSSEL_2;                   // Sets USCI Clock Source to SMCLK
     UCA1BR0 = 6;                            // 9600 Baud Rate
     UCA1BR1 = 0;                            // 9600 Baud Rate
     UCA1MCTL |= UCBRS_0 + UCBRF_13 + UCOS16;
@@ -149,6 +149,7 @@ int main(void)
     __no_operation();
 }
 
+
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
 #pragma vector=USCI_A1_VECTOR
 __interrupt void USCI_A1_ISR(void)
@@ -159,20 +160,18 @@ void __attribute__ ((interrupt(USCI_A1_VECTOR))) USCI_A1_ISR (void)
 #endif
 {
     switch(__even_in_range(UCA1IV,4))
-      {
-      case 0:break;                             // No Interrupt
-
-      case 2: // Receiver Interrupt
-
+    {
+    case 0 :break;
+    case 2:
           switch(byte)
               {
 
               case 0:
 
                   while(!(UCA1IFG & UCTXIFG));
-                  buffer = UCA1RXBUF;
-                  UCA1TXBUF = UCA1RXBUF - 3;    // Removes three bytes from the transmitted signals and transfers the rest to the next device
-                  __no_operation();             // Stops the clock
+                  buffer = UCA1RXBUF + 1;
+                  UCA1TXBUF = buffer - 4;    // Removes three bytes from the transmitted signals and transfers the rest to the next device
+             // Stops the clock
                   break;
 
               case 1:
@@ -205,12 +204,11 @@ void __attribute__ ((interrupt(USCI_A1_VECTOR))) USCI_A1_ISR (void)
               {
                    byte = 0;                    // Reset Count
               }
+       break;
+       case 4: break;
+       default: break;
 
-        break;
-
-        case 4:break;
-
-        default: break;
 
       }
+
 }
